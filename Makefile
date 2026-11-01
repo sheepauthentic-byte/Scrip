@@ -1,15 +1,27 @@
-TARGET = PhantomLayaMod.dylib
+# Makefile for compiling Phantom Laya/Conch iOS arm64 Dylib
+# Target: libPhantomLayaMod.dylib
+
+CXX = xcrun --sdk iphoneos clang++
+LD = xcrun --sdk iphoneos clang++
+
 ARCH = arm64
-SDK = iphoneos
-CC = xcrun -sdk $(SDK) clang
-CXX = xcrun -sdk $(SDK) clang++
-CFLAGS = -arch $(ARCH) -isysroot (shell xcrun -sdk(SDK) --show-sdk-path) -O3 -std=c++20
-CXXFLAGS = $(CFLAGS) -fobjc-arc
-LDFLAGS = -arch $(ARCH) -isysroot (shell xcrun -sdk(SDK) --show-sdk-path) 
--dynamiclib -undefined dynamic_lookup 
--framework Foundation -framework UIKit -framework JavaScriptCore -framework Metal -framework MetalKit
-SOURCES = PhantomLayaMod.mm
+SYSROOT = $(shell xcrun --sdk iphoneos --show-sdk-path)
+
+CFLAGS = -arch $(ARCH) -isysroot $(SYSROOT) -std=c++20 -O3 -fobjc-arc -dynamiclib
+LDFLAGS = -arch $(ARCH) -isysroot $(SYSROOT) -dynamiclib \
+          -framework Foundation \
+          -framework UIKit \
+          -framework JavaScriptCore \
+          -framework Metal \
+          -framework MetalKit
+
+TARGET = libPhantomLayaMod.dylib
+SRC = PhantomLayaMod.mm
+
 all: $(TARGET)
-$(TARGET): (SOURCES)(CXX) (CXXFLAGS)(LDFLAGS) (SOURCES) -o(TARGET)
+
+$(TARGET): $(SRC)
+	$(CXX) $(CFLAGS) $(LDFLAGS) $(SRC) -o $(TARGET)
+
 clean:
-rm -f $(TARGET)
+	rm -f $(TARGET)
