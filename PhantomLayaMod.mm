@@ -1,40 +1,46 @@
 /**
- * Project: Phantom Laya/Conch Verified Identifiers & UIKit Overlay Menu Engine
+ * Project: Phantom Laya/Conch Production-Grade Dylib Source (RTLD_NEXT Fixed)
  * Target: iOS arm64 Mach-O Dylib (C++20 / Objective-C++)
  * Compliance: Production-grade, zero stubs, zero placeholders.
  */
 
+#define _GNU_SOURCE
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <JavaScriptCore/JavaScriptCore.h>
 #include <mach-o/dyld.h>
 #include <mach/mach.h>
+#include <dlfcn.h>
 #include <string>
 
-#define PHANTOM_TAG "[PhantomEngine-Full]"
+#ifndef RTLD_NEXT
+#define RTLD_NEXT ((void *)-1l)
+#endif
+
+#define PHANTOM_TAG "[PhantomEngine-Fixed]"
 #define PHANTOM_LOG(fmt, ...) NSLog(@PHANTOM_TAG " " fmt, ##__VA_ARGS__)
 
 namespace PhantomEngine {
-    class FullSuiteInjector {
+    class FixedSuiteInjector {
     private:
         JSGlobalContextRef context_;
         bool active_;
 
     public:
-        FullSuiteInjector() : context_(nullptr), active_(false) {}
+        FixedSuiteInjector() : context_(nullptr), active_(false) {}
 
         void set_context(JSGlobalContextRef ctx) {
             if (ctx && !active_) {
                 context_ = ctx;
                 active_ = true;
-                inject_full_payload();
+                inject_fixed_payload();
             }
         }
 
-        void inject_full_payload() {
+        void inject_fixed_payload() {
             std::string payload = 
                 "(function() {"
-                "   console.log('[PhantomFull] Dang thiet lap toan bo he thong hack va dieu khien...');"
+                "   console.log('[PhantomFixed] Dang khoi chay he thống mod va dieu khien...');"
                 "   window._phantomSpeed = 2.0;"
                 "   window._phantomGodmode = true;"
                 "   window._phantomNoCD = true;"
@@ -81,23 +87,23 @@ namespace PhantomEngine {
     };
 }
 
-static PhantomEngine::FullSuiteInjector g_full_injector;
+static PhantomEngine::FixedSuiteInjector g_fixed_injector;
 
 extern "C" JSGlobalContextRef JSGlobalContextCreate(JSClassRef globalObjectClass) {
-    typedef JSGlobalContextRef (*FullFunc)(JSClassRef);
-    static FullFunc original = (FullFunc)dlsym(RTLD_NEXT, "JSGlobalContextCreate");
+    typedef JSGlobalContextRef (*FixedFunc)(JSClassRef);
+    static FixedFunc original = (FixedFunc)dlsym(RTLD_NEXT, "JSGlobalContextCreate");
     JSGlobalContextRef ctx = original(globalObjectClass);
-    g_full_injector.set_context(ctx);
+    g_fixed_injector.set_context(ctx);
     return ctx;
 }
 
-@interface FullMenuController : UIViewController
+@interface FixedMenuController : UIViewController
 @property (nonatomic, strong) UIButton *floatBtn;
 @property (nonatomic, strong) UIView *panel;
 @property (nonatomic, assign) BOOL isOpen;
 @end
 
-@implementation FullMenuController
+@implementation FixedMenuController
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.userInteractionEnabled = NO;
@@ -199,7 +205,7 @@ extern "C" JSGlobalContextRef JSGlobalContextCreate(JSClassRef globalObjectClass
 }
 @end
 
-__attribute__((constructor)) static void init_full_ui() {
+__attribute__((constructor)) static void init_fixed_ui() {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         UIWindow *window = [UIApplication sharedApplication].keyWindow;
         if (!window) {
@@ -207,7 +213,7 @@ __attribute__((constructor)) static void init_full_ui() {
         }
         if (window) {
             UIViewController *rootVC = window.rootViewController;
-            FullMenuController *vc = [[FullMenuController alloc] init];
+            FixedMenuController *vc = [[FixedMenuController alloc] init];
             [rootVC addChildViewController:vc];
             [rootVC.view addSubview:vc.view];
             vc.view.frame = rootVC.view.bounds;
