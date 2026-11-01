@@ -1,5 +1,5 @@
 /**
- * Project: Phantom Laya/Conch Ultimate Production-Grade Dylib Source
+ * Project: Phantom Laya/Conch Final PassThrough Architecture
  * Target: iOS arm64 Mach-O Dylib (C++20 / Objective-C++)
  * Compliance: Production-grade, zero stubs, zero placeholders.
  */
@@ -18,17 +18,17 @@
 #define RTLD_NEXT ((void *)-1l)
 #endif
 
-#define PHANTOM_TAG "[PhantomEngine-Ultimate]"
+#define PHANTOM_TAG "[PhantomEngine-Perfect]"
 #define PHANTOM_LOG(fmt, ...) NSLog(@PHANTOM_TAG " " fmt, ##__VA_ARGS__)
 
 namespace PhantomEngine {
-    class UltimateInjector {
+    class PerfectInjector {
     private:
         JSGlobalContextRef context_;
         bool active_;
 
     public:
-        UltimateInjector() : context_(nullptr), active_(false) {}
+        PerfectInjector() : context_(nullptr), active_(false) {}
 
         void set_context(JSGlobalContextRef ctx) {
             if (ctx && !active_) {
@@ -41,7 +41,7 @@ namespace PhantomEngine {
         void inject_payload() {
             std::string payload = 
                 "(function() {"
-                "   console.log('[PhantomUltimate] Khoi tao toan bo he thong inject vao Laya runtime...');"
+                "   console.log('[PhantomPerfect] Tich hop module hack vao Laya runtime thanh cong...');"
                 "   window._phantomSpeed = 2.0;"
                 "   window._phantomGodmode = true;"
                 "   window._phantomNoCD = true;"
@@ -103,43 +103,54 @@ namespace PhantomEngine {
     };
 }
 
-static PhantomEngine::UltimateInjector g_ultimate_injector;
+static PhantomEngine::PerfectInjector g_perfect_injector;
 
 extern "C" JSGlobalContextRef JSGlobalContextCreate(JSClassRef globalObjectClass) {
-    typedef JSGlobalContextRef (*UltimateFunc)(JSClassRef);
-    static UltimateFunc original = (UltimateFunc)dlsym(RTLD_NEXT, "JSGlobalContextCreate");
+    typedef JSGlobalContextRef (*PerfectFunc)(JSClassRef);
+    static PerfectFunc original = (PerfectFunc)dlsym(RTLD_NEXT, "JSGlobalContextCreate");
     JSGlobalContextRef ctx = original(globalObjectClass);
-    g_ultimate_injector.set_context(ctx);
+    g_perfect_injector.set_context(ctx);
     return ctx;
 }
 
-@interface UltimateTouchPassThroughView : UIView
+@interface PerfectPassThroughView : UIView
+@property (nonatomic, weak) UIButton *floatBtn;
+@property (nonatomic, weak) UIView *panel;
+@property (nonatomic, assign) BOOL isMenuOpen;
 @end
 
-@implementation UltimateTouchPassThroughView
+@implementation PerfectPassThroughView
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
-    UIView *hitView = [super hitTest:point withEvent:event];
-    if (hitView == self) {
-        return nil;
+    CGPoint btnPoint = [self convertPoint:point toView:self.floatBtn];
+    if ([self.floatBtn pointInside:btnPoint withEvent:event]) {
+        return [self.floatBtn hitTest:btnPoint withEvent:event];
     }
-    return hitView;
+    
+    if (self.isMenuOpen && self.panel && !self.panel.hidden) {
+        CGPoint panelPoint = [self convertPoint:point toView:self.panel];
+        if ([self.panel pointInside:panelPoint withEvent:event]) {
+            return [self.panel hitTest:panelPoint withEvent:event];
+        }
+    }
+    return nil;
 }
 @end
 
-@interface UltimateMenuController : UIViewController
+@interface PerfectMenuController : UIViewController
 @property (nonatomic, strong) UIButton *floatBtn;
 @property (nonatomic, strong) UIView *panel;
-@property (nonatomic, assign) BOOL isOpen;
+@property (nonatomic, strong) PerfectPassThroughView *customView;
 @end
 
-@implementation UltimateMenuController
+@implementation PerfectMenuController
 - (void)loadView {
-    self.view = [[UltimateTouchPassThroughView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    self.customView = [[PerfectPassThroughView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    self.customView.backgroundColor = [UIColor clearColor];
+    self.view = self.customView;
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.view.backgroundColor = [UIColor clearColor];
     
     self.floatBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     self.floatBtn.frame = CGRectMake(30, 100, 60, 60);
@@ -161,6 +172,10 @@ extern "C" JSGlobalContextRef JSGlobalContextCreate(JSClassRef globalObjectClass
     self.panel.layer.borderColor = [[UIColor colorWithRed:0.3 green:0.3 blue:0.4 alpha:1.0] CGColor];
     self.panel.hidden = YES;
     self.panel.userInteractionEnabled = YES;
+    
+    self.customView.floatBtn = self.floatBtn;
+    self.customView.panel = self.panel;
+    self.customView.isMenuOpen = NO;
     
     UILabel *title = [[UILabel alloc] initWithFrame:CGRectMake(0, 10, 320, 30)];
     title.text = @"TRẦN MẠNH CƯỜNG - MOD MENU";
@@ -226,8 +241,8 @@ extern "C" JSGlobalContextRef JSGlobalContextCreate(JSClassRef globalObjectClass
 }
 
 - (void)toggleMenu {
-    self.isOpen = !self.isOpen;
-    self.panel.hidden = !self.isOpen;
+    self.customView.isMenuOpen = !self.customView.isMenuOpen;
+    self.panel.hidden = !self.customView.isMenuOpen;
 }
 
 - (void)handlePan:(UIPanGestureRecognizer *)g {
@@ -293,21 +308,21 @@ extern "C" JSGlobalContextRef JSGlobalContextCreate(JSClassRef globalObjectClass
 }
 @end
 
-static UIWindow *g_ultimate_overlayWindow = nil;
+static UIWindow *g_perfect_overlayWindow = nil;
 
-__attribute__((constructor)) static void init_ultimate_overlay() {
+__attribute__((constructor)) static void init_perfect_overlay() {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        if (!g_ultimate_overlayWindow) {
+        if (!g_perfect_overlayWindow) {
             UIScene *scene = [[[UIApplication sharedApplication] connectedScenes] allObjects].firstObject;
             if ([scene isKindOfClass:[UIWindowScene class]]) {
-                g_ultimate_overlayWindow = [[UIWindow alloc] initWithWindowScene:(UIWindowScene *)scene];
+                g_perfect_overlayWindow = [[UIWindow alloc] initWithWindowScene:(UIWindowScene *)scene];
             } else {
-                g_ultimate_overlayWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+                g_perfect_overlayWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
             }
-            g_ultimate_overlayWindow.windowLevel = UIWindowLevelAlert + 1;
-            g_ultimate_overlayWindow.backgroundColor = [UIColor clearColor];
-            g_ultimate_overlayWindow.rootViewController = [[UltimateMenuController alloc] init];
-            g_ultimate_overlayWindow.hidden = NO;
+            g_perfect_overlayWindow.windowLevel = UIWindowLevelAlert + 1;
+            g_perfect_overlayWindow.backgroundColor = [UIColor clearColor];
+            g_perfect_overlayWindow.rootViewController = [[PerfectMenuController alloc] init];
+            g_perfect_overlayWindow.hidden = NO;
         }
     });
 }
