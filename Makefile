@@ -1,5 +1,4 @@
-# Makefile for compiling Phantom Laya/Conch iOS arm64 Dylib
-# Target: libPhantomLayaMod.dylib
+# Makefile for compiling Phantom Laya/Conch iOS arm64 Dylib (CoreGraphics Linked)
 
 CXX = xcrun --sdk iphoneos clang++
 LD = xcrun --sdk iphoneos clang++
@@ -11,6 +10,7 @@ CFLAGS = -arch $(ARCH) -isysroot $(SYSROOT) -std=c++20 -O3 -fobjc-arc -dynamicli
 LDFLAGS = -arch $(ARCH) -isysroot $(SYSROOT) -dynamiclib \
           -framework Foundation \
           -framework UIKit \
+          -framework CoreGraphics \
           -framework JavaScriptCore \
           -framework Metal \
           -framework MetalKit
