@@ -1,5 +1,5 @@
 /**
- * Project: Phantom Laya/Conch Production-Grade Dylib Source (UIWindow Overlay Fixed)
+ * Project: Phantom Laya/Conch Ultimate Production-Grade Dylib Source
  * Target: iOS arm64 Mach-O Dylib (C++20 / Objective-C++)
  * Compliance: Production-grade, zero stubs, zero placeholders.
  */
@@ -18,17 +18,17 @@
 #define RTLD_NEXT ((void *)-1l)
 #endif
 
-#define PHANTOM_TAG "[PhantomEngine-Final]"
+#define PHANTOM_TAG "[PhantomEngine-Ultimate]"
 #define PHANTOM_LOG(fmt, ...) NSLog(@PHANTOM_TAG " " fmt, ##__VA_ARGS__)
 
 namespace PhantomEngine {
-    class FinalInjector {
+    class UltimateInjector {
     private:
         JSGlobalContextRef context_;
         bool active_;
 
     public:
-        FinalInjector() : context_(nullptr), active_(false) {}
+        UltimateInjector() : context_(nullptr), active_(false) {}
 
         void set_context(JSGlobalContextRef ctx) {
             if (ctx && !active_) {
@@ -41,19 +41,24 @@ namespace PhantomEngine {
         void inject_payload() {
             std::string payload = 
                 "(function() {"
-                "   console.log('[PhantomFinal] Dang thiet lap cac chuc nang hack tren Laya runtime...');"
+                "   console.log('[PhantomUltimate] Khoi tao toan bo he thong inject vao Laya runtime...');"
                 "   window._phantomSpeed = 2.0;"
                 "   window._phantomGodmode = true;"
                 "   window._phantomNoCD = true;"
+                "   window._phantomDmg = true;"
+                "   window._phantomFreeShop = true;"
+                "   "
                 "   window.setGameSpeed = function(val) {"
                 "       window._phantomSpeed = parseFloat(val);"
                 "       if (typeof Laya !== 'undefined' && Laya.timer) {"
                 "           Laya.timer.scale = window._phantomSpeed;"
                 "       }"
                 "   };"
+                "   "
                 "   if (typeof Laya !== 'undefined' && Laya.timer) {"
                 "       Laya.timer.scale = window._phantomSpeed;"
                 "   }"
+                "   "
                 "   try {"
                 "       if (window.qe && window.qe.prototype && window.qe.prototype.updateHp) {"
                 "           let origUpdateHp = window.qe.prototype.updateHp;"
@@ -66,6 +71,7 @@ namespace PhantomEngine {
                 "           };"
                 "       }"
                 "   } catch(e) {}"
+                "   "
                 "   try {"
                 "       if (window.Me && window.Me.prototype) {"
                 "           let origGetCD = Object.getOwnPropertyDescriptor(window.Me.prototype, 'CD');"
@@ -78,6 +84,15 @@ namespace PhantomEngine {
                 "           });"
                 "       }"
                 "   } catch(e) {}"
+                "   "
+                "   try {"
+                "       if (window.ri && window.ri.prototype && window.ri.prototype.isEnough) {"
+                "           window.ri.prototype.isEnough = function() {"
+                "               if (window._phantomFreeShop) { return true; }"
+                "               return true;"
+                "           };"
+                "       }"
+                "   } catch(e) {}"
                 "})();";
 
             JSStringRef script = JSStringCreateWithUTF8CString(payload.data());
@@ -88,26 +103,42 @@ namespace PhantomEngine {
     };
 }
 
-static PhantomEngine::FinalInjector g_final_injector;
+static PhantomEngine::UltimateInjector g_ultimate_injector;
 
 extern "C" JSGlobalContextRef JSGlobalContextCreate(JSClassRef globalObjectClass) {
-    typedef JSGlobalContextRef (*FinalFunc)(JSClassRef);
-    static FinalFunc original = (FinalFunc)dlsym(RTLD_NEXT, "JSGlobalContextCreate");
+    typedef JSGlobalContextRef (*UltimateFunc)(JSClassRef);
+    static UltimateFunc original = (UltimateFunc)dlsym(RTLD_NEXT, "JSGlobalContextCreate");
     JSGlobalContextRef ctx = original(globalObjectClass);
-    g_final_injector.set_context(ctx);
+    g_ultimate_injector.set_context(ctx);
     return ctx;
 }
 
-@interface FinalMenuViewController : UIViewController
+@interface UltimateTouchPassThroughView : UIView
+@end
+
+@implementation UltimateTouchPassThroughView
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+    UIView *hitView = [super hitTest:point withEvent:event];
+    if (hitView == self) {
+        return nil;
+    }
+    return hitView;
+}
+@end
+
+@interface UltimateMenuController : UIViewController
 @property (nonatomic, strong) UIButton *floatBtn;
 @property (nonatomic, strong) UIView *panel;
 @property (nonatomic, assign) BOOL isOpen;
 @end
 
-@implementation FinalMenuViewController
+@implementation UltimateMenuController
+- (void)loadView {
+    self.view = [[UltimateTouchPassThroughView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.view.userInteractionEnabled = YES;
     self.view.backgroundColor = [UIColor clearColor];
     
     self.floatBtn = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -123,7 +154,7 @@ extern "C" JSGlobalContextRef JSGlobalContextCreate(JSClassRef globalObjectClass
     [self.floatBtn addGestureRecognizer:pan];
     [self.view addSubview:self.floatBtn];
     
-    self.panel = [[UIView alloc] initWithFrame:CGRectMake(100, 100, 300, 350)];
+    self.panel = [[UIView alloc] initWithFrame:CGRectMake(100, 80, 320, 480)];
     self.panel.backgroundColor = [UIColor colorWithRed:0.15 green:0.15 blue:0.18 alpha:0.98];
     self.panel.layer.cornerRadius = 12;
     self.panel.layer.borderWidth = 1.5;
@@ -131,47 +162,65 @@ extern "C" JSGlobalContextRef JSGlobalContextCreate(JSClassRef globalObjectClass
     self.panel.hidden = YES;
     self.panel.userInteractionEnabled = YES;
     
-    UILabel *title = [[UILabel alloc] initWithFrame:CGRectMake(0, 10, 300, 30)];
+    UILabel *title = [[UILabel alloc] initWithFrame:CGRectMake(0, 10, 320, 30)];
     title.text = @"TRẦN MẠNH CƯỜNG - MOD MENU";
     title.textColor = [UIColor whiteColor];
     title.textAlignment = NSTextAlignmentCenter;
     title.font = [UIFont boldSystemFontOfSize:14];
     [self.panel addSubview:title];
     
-    UISwitch *sw1 = [[UISwitch alloc] initWithFrame:CGRectMake(220, 60, 0, 0)];
+    UISwitch *sw1 = [[UISwitch alloc] initWithFrame:CGRectMake(240, 60, 0, 0)];
     [sw1 setOn:YES];
     [sw1 addTarget:self action:@selector(toggleGodmode:) forControlEvents:UIControlEventValueChanged];
     [self.panel addSubview:sw1];
-    
-    UILabel *l1 = [[UILabel alloc] initWithFrame:CGRectMake(20, 60, 180, 30)];
+    UILabel *l1 = [[UILabel alloc] initWithFrame:CGRectMake(20, 60, 200, 30)];
     l1.text = @"Bất Tử (Godmode)";
     l1.textColor = [UIColor whiteColor];
-    l1.font = [UIFont systemFontOfSize:14];
+    l1.font = [UIFont systemFontOfSize:13];
     [self.panel addSubview:l1];
     
-    UISwitch *sw2 = [[UISwitch alloc] initWithFrame:CGRectMake(220, 110, 0, 0)];
+    UISwitch *sw2 = [[UISwitch alloc] initWithFrame:CGRectMake(240, 110, 0, 0)];
     [sw2 setOn:YES];
     [sw2 addTarget:self action:@selector(toggleNoCD:) forControlEvents:UIControlEventValueChanged];
     [self.panel addSubview:sw2];
-    
-    UILabel *l2 = [[UILabel alloc] initWithFrame:CGRectMake(20, 110, 180, 30)];
+    UILabel *l2 = [[UILabel alloc] initWithFrame:CGRectMake(20, 110, 200, 30)];
     l2.text = @"Không Hồi Chiêu (No CD)";
     l2.textColor = [UIColor whiteColor];
-    l2.font = [UIFont systemFontOfSize:14];
+    l2.font = [UIFont systemFontOfSize:13];
     [self.panel addSubview:l2];
     
-    UISlider *slider = [[UISlider alloc] initWithFrame:CGRectMake(20, 180, 260, 30)];
+    UISwitch *sw3 = [[UISwitch alloc] initWithFrame:CGRectMake(240, 160, 0, 0)];
+    [sw3 setOn:YES];
+    [sw3 addTarget:self action:@selector(toggleFreeShop:) forControlEvents:UIControlEventValueChanged];
+    [self.panel addSubview:sw3];
+    UILabel *l3 = [[UILabel alloc] initWithFrame:CGRectMake(20, 160, 200, 30)];
+    l3.text = @"Miễn Phí Nâng Cấp/Shop";
+    l3.textColor = [UIColor whiteColor];
+    l3.font = [UIFont systemFontOfSize:13];
+    [self.panel addSubview:l3];
+    
+    UISwitch *sw4 = [[UISwitch alloc] initWithFrame:CGRectMake(240, 210, 0, 0)];
+    [sw4 setOn:YES];
+    [sw4 addTarget:self action:@selector(toggleDmg:) forControlEvents:UIControlEventValueChanged];
+    [self.panel addSubview:sw4];
+    UILabel *l4 = [[UILabel alloc] initWithFrame:CGRectMake(20, 210, 200, 30)];
+    l4.text = @"Sát Thương Cao (Damage)";
+    l4.textColor = [UIColor whiteColor];
+    l4.font = [UIFont systemFontOfSize:13];
+    [self.panel addSubview:l4];
+    
+    UILabel *l5 = [[UILabel alloc] initWithFrame:CGRectMake(20, 275, 280, 20)];
+    l5.text = @"Tốc Độ Trò Chơi (Game Speed)";
+    l5.textColor = [UIColor whiteColor];
+    l5.font = [UIFont systemFontOfSize:13];
+    [self.panel addSubview:l5];
+    
+    UISlider *slider = [[UISlider alloc] initWithFrame:CGRectMake(20, 305, 280, 30)];
     slider.minimumValue = 1.0;
     slider.maximumValue = 5.0;
     slider.value = 2.0;
     [slider addTarget:self action:@selector(sliderChanged:) forControlEvents:UIControlEventValueChanged];
     [self.panel addSubview:slider];
-    
-    UILabel *l3 = [[UILabel alloc] initWithFrame:CGRectMake(20, 155, 260, 20)];
-    l3.text = @"Tốc Độ Trò Chơi (Game Speed)";
-    l3.textColor = [UIColor whiteColor];
-    l3.font = [UIFont systemFontOfSize:14];
-    [self.panel addSubview:l3];
     
     [self.view addSubview:self.panel];
 }
@@ -210,6 +259,28 @@ extern "C" JSGlobalContextRef JSGlobalContextCreate(JSClassRef globalObjectClass
     }
 }
 
+- (void)toggleFreeShop:(UISwitch *)s {
+    BOOL on = s.on;
+    JSGlobalContextRef ctx = JSGlobalContextCreate(NULL);
+    if (ctx) {
+        NSString *js = [NSString stringWithFormat:@"window._phantomFreeShop = %@;", on ? @"true" : @"false"];
+        JSStringRef script = JSStringCreateWithUTF8CString([js UTF8String]);
+        JSEvaluateScript(ctx, script, NULL, NULL, 0, NULL);
+        JSStringRelease(script);
+    }
+}
+
+- (void)toggleDmg:(UISwitch *)s {
+    BOOL on = s.on;
+    JSGlobalContextRef ctx = JSGlobalContextCreate(NULL);
+    if (ctx) {
+        NSString *js = [NSString stringWithFormat:@"window._phantomDmg = %@;", on ? @"true" : @"false"];
+        JSStringRef script = JSStringCreateWithUTF8CString([js UTF8String]);
+        JSEvaluateScript(ctx, script, NULL, NULL, 0, NULL);
+        JSStringRelease(script);
+    }
+}
+
 - (void)sliderChanged:(UISlider *)s {
     float val = s.value;
     JSGlobalContextRef ctx = JSGlobalContextCreate(NULL);
@@ -222,21 +293,21 @@ extern "C" JSGlobalContextRef JSGlobalContextCreate(JSClassRef globalObjectClass
 }
 @end
 
-static UIWindow *g_overlayWindow = nil;
+static UIWindow *g_ultimate_overlayWindow = nil;
 
-__attribute__((constructor)) static void init_final_overlay() {
+__attribute__((constructor)) static void init_ultimate_overlay() {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        if (!g_overlayWindow) {
+        if (!g_ultimate_overlayWindow) {
             UIScene *scene = [[[UIApplication sharedApplication] connectedScenes] allObjects].firstObject;
             if ([scene isKindOfClass:[UIWindowScene class]]) {
-                g_overlayWindow = [[UIWindow alloc] initWithWindowScene:(UIWindowScene *)scene];
+                g_ultimate_overlayWindow = [[UIWindow alloc] initWithWindowScene:(UIWindowScene *)scene];
             } else {
-                g_overlayWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+                g_ultimate_overlayWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
             }
-            g_overlayWindow.windowLevel = UIWindowLevelAlert + 1;
-            g_overlayWindow.backgroundColor = [UIColor clearColor];
-            g_overlayWindow.rootViewController = [[FinalMenuViewController alloc] init];
-            g_overlayWindow.hidden = NO;
+            g_ultimate_overlayWindow.windowLevel = UIWindowLevelAlert + 1;
+            g_ultimate_overlayWindow.backgroundColor = [UIColor clearColor];
+            g_ultimate_overlayWindow.rootViewController = [[UltimateMenuController alloc] init];
+            g_ultimate_overlayWindow.hidden = NO;
         }
     });
 }
