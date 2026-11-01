@@ -1,0 +1,24 @@
+name: Build iOS Dylib
+on:
+push:
+branches: [ main, master ]
+pull_request:
+branches: [ main, master ]
+jobs:
+build:
+runs-on: macos-latest
+steps:
+- name: Checkout Repository
+uses: actions/checkout@v3
+- name: Set up Xcode SDK
+run: |
+sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
+xcrun --sdk iphoneos --show-sdk-path
+- name: Build Dylib via Makefile
+run: |
+make all
+- name: Upload Artifact
+uses: actions/upload-artifact@v3
+with:
+name: PhantomLayaMod-Artifact
+path: PhantomLayaMod.dylib
