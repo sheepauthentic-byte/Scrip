@@ -1,0 +1,32 @@
+name: Build iOS Dylib
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-dylib:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Xcode
+      run: |
+        sudo xcode-select -switch /Applications/Xcode.app
+        xcodebuild -version
+
+    - name: Compile Dylib via Makefile
+      run: |
+        make clean
+        make
+
+    - name: Upload Compiled Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: libPhantomLayaMod
+        path: libPhantomLayaMod.dylib
